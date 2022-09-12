@@ -6,10 +6,10 @@ from math import sin,cos,pi
 
 from time import sleep
 
-g = np.array([0,0,-10.0])
+g = np.array([0,0,-100.0])
 dt = 0.001
 ro = 1.2754
-Cd = 0.5
+Cd = 0.5 # Ova vrednost je ukleta, ne menjati!
 
 class Wing:
     def __init__(self,point1 = np.array([0.0,0.0,0.0]),point2 = np.array([0.0,0.0,0.0]),pivot = np.array([0.0,0.0,0.0])):
@@ -159,21 +159,15 @@ class PhysicsSim:
         self.v = np.array([0.0,0.0,0.0])
         self.w = np.array([0.0,0.0,0.0])
 
-        self.f.lwing.rotateWing(0,pi/2,0)
-        self.f.rwing.rotateWing(0,-pi/2,0)
-        # self.f.rotateFly(np.array([0.0,0.0,0.0]),0.0,0.0,1.0)
-        #for i in range(10):
-            #self.f.rotateFly(np.array([0.0,0.0,0.0]),3.14159/4,0,0)
-            #self.plot3d()
+        # self.f.lwing.rotateWing(0,pi/2,0)
+        # self.f.rwing.rotateWing(0,-pi/2,0)
+
         self.midLLast = self.f.lwing.getMiddle()
         self.midRLast = self.f.rwing.getMiddle()
 
-        
-        self.body = vp.quad(vs=[vp.vertex(pos=vp.vec(self.f.blf[0],self.f.blf[2],self.f.blf[1])),
-                                vp.vertex(pos=vp.vec(self.f.blb[0],self.f.blb[2],self.f.blb[1])),
-                                vp.vertex(pos=vp.vec(self.f.brb[0],self.f.brb[2],self.f.brb[1])),
-                                vp.vertex(pos=vp.vec(self.f.brf[0],self.f.brf[2],self.f.brf[1]))])
+        self.setup3D()
 
+    def setup3D(self):
         self.lp = vp.vertex(pos=vp.vec(self.f.lwing.pivot[0],self.f.lwing.pivot[2],self.f.lwing.pivot[1]))
         self.lp1 = vp.vertex(pos=vp.vec(self.f.lwing.point1[0],self.f.lwing.point1[2],self.f.lwing.point1[1]))
         self.lp2 = vp.vertex(pos=vp.vec(self.f.lwing.point2[0],self.f.lwing.point2[2],self.f.lwing.point2[1]))
@@ -182,7 +176,11 @@ class PhysicsSim:
         self.rp1 = vp.vertex(pos=vp.vec(self.f.rwing.point1[0],self.f.rwing.point1[2],self.f.rwing.point1[1]))
         self.rp2 = vp.vertex(pos=vp.vec(self.f.rwing.point2[0],self.f.rwing.point2[2],self.f.rwing.point2[1]))
         self.rw = vp.triangle(vs=[self.rp,self.rp1,self.rp2])
-        
+
+        self.v1 = vp.vertex(pos=vp.vec(self.f.blf[0],self.f.blf[2],self.f.blf[1]))
+        self.v2 = vp.vertex(pos=vp.vec(self.f.blb[0],self.f.blb[2],self.f.blb[1]))
+        self.v3 = vp.vertex(pos=vp.vec(self.f.brb[0],self.f.brb[2],self.f.brb[1]))
+        self.v4 = vp.vertex(pos=vp.vec(self.f.brf[0],self.f.brf[2],self.f.brf[1]))        
 
     def update3D(self):
         self.lp.pos = vp.vec(self.f.lwing.pivot[0],self.f.lwing.pivot[2],self.f.lwing.pivot[1])
@@ -196,11 +194,12 @@ class PhysicsSim:
         self.lw = vp.triangle(vs=[self.lp,self.lp1,self.lp2])
         self.rw = vp.triangle(vs=[self.rp,self.rp1,self.rp2])
 
-        self.body = vp.quad(vs=[vp.vertex(pos=vp.vec(self.f.blf[0],self.f.blf[2],self.f.blf[1])),
-                                vp.vertex(pos=vp.vec(self.f.blb[0],self.f.blb[2],self.f.blb[1])),
-                                vp.vertex(pos=vp.vec(self.f.brb[0],self.f.brb[2],self.f.brb[1])),
-                                vp.vertex(pos=vp.vec(self.f.brf[0],self.f.brf[2],self.f.brf[1]))])
-        # print('test')
+        self.v1.pos = vp.vec(self.f.blf[0],self.f.blf[2],self.f.blf[1])
+        self.v2.pos = vp.vec(self.f.blb[0],self.f.blb[2],self.f.blb[1])
+        self.v3.pos = vp.vec(self.f.brb[0],self.f.brb[2],self.f.brb[1])
+        self.v4.pos = vp.vec(self.f.brf[0],self.f.brf[2],self.f.brf[1])
+
+        self.body = vp.quad(vs=[self.v1,self.v2,self.v3,self.v4])
     
     def plot3d(self):
         fig = plt.figure(figsize=(4,4))
@@ -260,9 +259,9 @@ class PhysicsSim:
             z = self.w[2]*dt
             self.f.rotateFly(pq,x,y,z)
             self.update3D()
-            self.f.lwing.rotateWing(-0.0,-0.03,0.0)
-            self.f.rwing.rotateWing(0.0,0.03,0.0)
-            # sleep(0.1)
+            self.f.lwing.rotateWing(0.05,0.0,0.0)
+            self.f.rwing.rotateWing(0.05,0.0,0.0)
+            sleep(0.1)
 
             
 if __name__ == "__main__":
