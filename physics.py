@@ -118,14 +118,21 @@ class PhysicsEngine:
         self.w = np.array([0.0,0.0,0.0])
 
 
-        self.f.rotation = np.array([0.0,pi/2,0.0])
-        self.f.lwing.flapWing(np.array([pi/2,0.0,-0.0]))
-        self.f.rwing.flapWing(np.array([-pi/2,0.0,0.0]))
+        # self.f.rotation = np.array([0.0,pi/4,0.0])
+        # self.f.lwing.flapWing(np.array([pi/2,0.0,-0.0]))
+        # self.f.rwing.flapWing(np.array([-pi/2,0.0,0.0]))
 
         
         self.midLLast = convertToGlobal(self.f.position,self.f.rotation,self.f.lwing.getMiddle())
         self.midRLast = convertToGlobal(self.f.position,self.f.rotation,self.f.rwing.getMiddle())
         self.setup3D()
+
+        self.pointerLx = vp.arrow()
+        self.pointerLy = vp.arrow()
+        self.pointerLz = vp.arrow()
+        self.pointerRx = vp.arrow()
+        self.pointerRy = vp.arrow()
+        self.pointerRz = vp.arrow()
 
     def run(self):
         t = 0
@@ -135,16 +142,18 @@ class PhysicsEngine:
             Fb = self.calculateBodyDrag()
             Q = self.f.mass * g
             pq = np.array([0.0,0.0,0.5,1.0])
-            Ml = np.cross(Fl,convertToGlobal(self.f.position,self.f.rotation,(pl-pq))[:-1])
-            Mr = np.cross(Fr,convertToGlobal(self.f.position,self.f.rotation,(pr-pq))[:-1])
+            Ml = np.cross(Fl,convertToGlobal(np.array([0,0,0]),self.f.rotation,(pl-pq))[:-1])
+            Mr = np.cross(Fr,convertToGlobal(np.array([0,0,0]),self.f.rotation,(pr-pq))[:-1])
             
             # print(Ml,Mr)
             M = Ml+Mr
+            # M = 0
             acm = (Fl+Fr+Q+Fb) / self.f.mass
             Icm = np.array([1.0,1.0,1.0])
             alfa = M / Icm
             self.v += acm *dt
             self.w += alfa * dt
+            # self.w *= 0
             self.f.position[:-1] += self.v*dt
             self.f.rotation += self.w*dt
             self.update3D()
@@ -153,7 +162,7 @@ class PhysicsEngine:
             self.f.lwing.flapWing(np.array([0.01,0.00,0.0]))
             self.f.rwing.flapWing(np.array([-0.01,-0.0,-0.0]))
             t+=dt
-            sleep(0.1)
+            sleep(0.2)
 
     def calculateBodyDrag(self):
         F = -1/2 * ro * Cd * 6 * self.v * np.absolute(self.v)
@@ -175,10 +184,21 @@ class PhysicsEngine:
         ar = np.absolute(ar)
         vl = dl[:-1]/dt
         vr = dr[:-1]/dt
-        Fl = -1/2 * ro * Cd * al[:-1] * vl * np.absolute(vl)
-        Fr = -1/2 * ro * Cd * ar[:-1] * vr * np.absolute(vr)
-        # pointerL = vp.arrow(pos=vp.vector(l[0],l[2],l[1]),axis=vp.vector(Fl[0]/10,Fl[2]/10,Fl[1]/10),shaftwidth=0.5)
-        # pointerR = vp.arrow(pos=vp.vector(r[0],r[2],r[1]),axis=vp.vector(Fr[0]/10,Fr[2]/10,Fr[1]/10),shaftwidth=0.5)
+        Fl = -1/2 * ro * Cd * al[:-1] * vl * vl * np.sign(vl)
+        Fr = -1/2 * ro * Cd * ar[:-1] * vr * vr * np.sign(vr)
+        self.pointerLx.pos = vp.vec(l[0],l[2],l[1])
+        self.pointerLx.axis = vp.vec(vl[0],0.0,0.0)
+        self.pointerLy.pos = vp.vec(l[0],l[2],l[1])
+        self.pointerLy.axis = vp.vec(0.0,vl[2],0.0)
+        self.pointerLz.pos = vp.vec(l[0],l[2],l[1])
+        self.pointerLz.axis = vp.vec(0.0,0.0,vl[1])
+
+        self.pointerRx.pos = vp.vec(r[0],r[2],r[1])
+        self.pointerRx.axis = vp.vec(vr[0],0.0,0.0)
+        self.pointerRy.pos = vp.vec(r[0],r[2],r[1])
+        self.pointerRy.axis = vp.vec(0.0,vr[2],0.0)
+        self.pointerRz.pos = vp.vec(r[0],r[2],r[1])
+        self.pointerRz.axis = vp.vec(0.0,0.0,vr[1])
         return Fl,Fr,self.f.lwing.getMiddle(),self.f.rwing.getMiddle() # Sile su vektor duzine 3, l i r duzine 4 (dimenzija 4 je uvek 1 zbog homogenous transformations)
     
     def setup3D(self):
