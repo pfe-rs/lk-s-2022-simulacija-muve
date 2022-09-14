@@ -91,6 +91,30 @@ class Wing:
         self.point2 = rotPivotY(self.point2,self.pivot,angles[1])
         self.point2 = rotPivotZ(self.point2,self.pivot,angles[2])
 
+    def flapWingConstrained(self,angles):
+
+        maxVX = 0.05
+        maxVY = 0.01
+        maxVZ = 0.01
+        if abs(angles[0]) > maxVX:
+            angles[0] = maxVX * np.sign(angles[0])
+        if abs(angles[1]) > maxVX:
+            angles[1] = maxVY * np.sign(angles[1])
+        if abs(angles[2]) > maxVX:
+            angles[2] = maxVZ * np.sign(angles[2])
+        
+        limitX = 0.4
+        limitY = pi/4
+        limitZ = 0.4
+        if self.rotation[0]+angles[0] > limitX or self.rotation[0]+angles[0] < -limitX:
+            angles[0] = 0.0
+        if self.rotation[1]+angles[1] > limitY or self.rotation[1]+angles[1] < -limitY:
+            angles[1] = 0.0
+        if self.rotation[2]+angles[2] > limitZ or self.rotation[2]+angles[2] < -limitZ:
+            angles[2] = 0.0
+
+        self.flapWing(angles)
+        
 class Fly:
     def __init__(self):
         self.position = np.array([0.0,0.0,0.0,1.0]) #Position i rotation sistema
@@ -153,16 +177,16 @@ class PhysicsEngine:
             alfa = M / Icm
             self.v += acm *dt
             self.w += alfa * dt
-            # self.w *= 0
+            self.w *= 0.8
             self.f.position[:-1] += self.v*dt
             self.f.rotation += self.w*dt
             self.update3D()
             t+= dt
             # print(self.f.position,self.v)
-            self.f.lwing.flapWing(np.array([0.01,0.00,0.0]))
-            self.f.rwing.flapWing(np.array([-0.01,-0.0,-0.0]))
+            self.f.lwing.flapWingConstrained(np.array([0.01,0.05,0.01]))
+            self.f.rwing.flapWingConstrained(np.array([0.01,-0.05,-0.01]))
             t+=dt
-            sleep(0.2)
+            sleep(0.1)
 
     def calculateBodyDrag(self):
         F = -1/2 * ro * Cd * 6 * self.v * np.absolute(self.v)
@@ -186,19 +210,19 @@ class PhysicsEngine:
         vr = dr[:-1]/dt
         Fl = -1/2 * ro * Cd * al[:-1] * vl * vl * np.sign(vl)
         Fr = -1/2 * ro * Cd * ar[:-1] * vr * vr * np.sign(vr)
-        self.pointerLx.pos = vp.vec(l[0],l[2],l[1])
-        self.pointerLx.axis = vp.vec(vl[0],0.0,0.0)
-        self.pointerLy.pos = vp.vec(l[0],l[2],l[1])
-        self.pointerLy.axis = vp.vec(0.0,vl[2],0.0)
-        self.pointerLz.pos = vp.vec(l[0],l[2],l[1])
-        self.pointerLz.axis = vp.vec(0.0,0.0,vl[1])
+        # self.pointerLx.pos = vp.vec(l[0],l[2],l[1])
+        # self.pointerLx.axis = vp.vec(vl[0],0.0,0.0)
+        # self.pointerLy.pos = vp.vec(l[0],l[2],l[1])
+        # self.pointerLy.axis = vp.vec(0.0,vl[2],0.0)
+        # self.pointerLz.pos = vp.vec(l[0],l[2],l[1])
+        # self.pointerLz.axis = vp.vec(0.0,0.0,vl[1])
 
-        self.pointerRx.pos = vp.vec(r[0],r[2],r[1])
-        self.pointerRx.axis = vp.vec(vr[0],0.0,0.0)
-        self.pointerRy.pos = vp.vec(r[0],r[2],r[1])
-        self.pointerRy.axis = vp.vec(0.0,vr[2],0.0)
-        self.pointerRz.pos = vp.vec(r[0],r[2],r[1])
-        self.pointerRz.axis = vp.vec(0.0,0.0,vr[1])
+        # self.pointerRx.pos = vp.vec(r[0],r[2],r[1])
+        # self.pointerRx.axis = vp.vec(vr[0],0.0,0.0)
+        # self.pointerRy.pos = vp.vec(r[0],r[2],r[1])
+        # self.pointerRy.axis = vp.vec(0.0,vr[2],0.0)
+        # self.pointerRz.pos = vp.vec(r[0],r[2],r[1])
+        # self.pointerRz.axis = vp.vec(0.0,0.0,vr[1])
         return Fl,Fr,self.f.lwing.getMiddle(),self.f.rwing.getMiddle() # Sile su vektor duzine 3, l i r duzine 4 (dimenzija 4 je uvek 1 zbog homogenous transformations)
     
     def setup3D(self):
