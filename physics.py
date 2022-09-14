@@ -4,7 +4,7 @@ from time import sleep
 
 import vpython as vp
 
-g = np.array([0.0,0.0,-0.0])
+g = np.array([0.0,0.0,-9.81])
 dt = 0.001
 ro = 0.1225
 Cd = 1.28
@@ -93,7 +93,7 @@ class Wing:
 
     def flapWingConstrained(self,angles):
 
-        maxVX = 0.05
+        maxVX = 0.06
         maxVY = 0.01
         maxVZ = 0.01
         if abs(angles[0]) > maxVX:
@@ -104,7 +104,7 @@ class Wing:
             angles[2] = maxVZ * np.sign(angles[2])
         
         limitX = 0.4
-        limitY = pi/4
+        limitY = pi/3
         limitZ = 0.4
         if self.rotation[0]+angles[0] > limitX or self.rotation[0]+angles[0] < -limitX:
             angles[0] = 0.0
@@ -136,57 +136,71 @@ class Fly:
 
 class PhysicsEngine:
     def __init__(self):
+
+        self.render3D = False
+
         self.f = Fly()
 
         self.v = np.array([0.0,0.0,0.0])
         self.w = np.array([0.0,0.0,0.0])
 
-
         # self.f.rotation = np.array([0.0,pi/4,0.0])
         # self.f.lwing.flapWing(np.array([pi/2,0.0,-0.0]))
         # self.f.rwing.flapWing(np.array([-pi/2,0.0,0.0]))
-
         
         self.midLLast = convertToGlobal(self.f.position,self.f.rotation,self.f.lwing.getMiddle())
         self.midRLast = convertToGlobal(self.f.position,self.f.rotation,self.f.rwing.getMiddle())
-        self.setup3D()
 
-        self.pointerLx = vp.arrow()
-        self.pointerLy = vp.arrow()
-        self.pointerLz = vp.arrow()
-        self.pointerRx = vp.arrow()
-        self.pointerRy = vp.arrow()
-        self.pointerRz = vp.arrow()
+
+        if self.render3D:
+            self.setup3D()
+            self.pointerLx = vp.arrow()
+            self.pointerLy = vp.arrow()
+            self.pointerLz = vp.arrow()
+            self.pointerRx = vp.arrow()
+            self.pointerRy = vp.arrow()
+            self.pointerRz = vp.arrow()
 
     def run(self):
         t = 0
-        runsim = True
-        while(runsim):
-            Fl,Fr,pl,pr = self.calculateDrag()
-            Fb = self.calculateBodyDrag()
-            Q = self.f.mass * g
-            pq = np.array([0.0,0.0,0.5,1.0])
-            Ml = np.cross(Fl,convertToGlobal(np.array([0,0,0]),self.f.rotation,(pl-pq))[:-1])
-            Mr = np.cross(Fr,convertToGlobal(np.array([0,0,0]),self.f.rotation,(pr-pq))[:-1])
+        tMax = 20
+
+        symetricWings = False
+
+        while(t < tMax):
+            anglesLeft,anglesRight = superAwesomeMLFunkcija(self.f.position,self.f.rotation,self.v,self.w,self.f.lwing.rotation,self.f.rwing.rotation) # Nemam pojma kako bi se povezivalo ali pretpostavljam ovako nekako
             
-            # print(Ml,Mr)
-            M = Ml+Mr
-            # M = 0
-            acm = (Fl+Fr+Q+Fb) / self.f.mass
-            Icm = np.array([1.0,1.0,1.0])
-            alfa = M / Icm
-            self.v += acm *dt
-            self.w += alfa * dt
-            self.w *= 0.8
-            self.f.position[:-1] += self.v*dt
-            self.f.rotation += self.w*dt
-            self.update3D()
+            self.step(anglesLeft,anglesRight)
+
+            if self.render3D:
+                self.update3D()
+                sleep(0.1)
+
             t+= dt
-            # print(self.f.position,self.v)
-            self.f.lwing.flapWingConstrained(np.array([0.01,0.05,0.01]))
-            self.f.rwing.flapWingConstrained(np.array([0.01,-0.05,-0.01]))
-            t+=dt
-            sleep(0.1)
+
+
+    def step(self,anglesLeft,anglesRight):
+        Fl,Fr,pl,pr = self.calculateDrag()
+        Fb = self.calculateBodyDrag()
+        Q = self.f.mass * g
+        pq = np.array([0.0,0.0,0.5,1.0])
+        Ml = np.cross(Fl,convertToGlobal(np.array([0,0,0]),self.f.rotation,(pl-pq))[:-1])
+        Mr = np.cross(Fr,convertToGlobal(np.array([0,0,0]),self.f.rotation,(pr-pq))[:-1])
+        
+        # print(Ml,Mr)
+        M = Ml+Mr
+        # M = 0
+        acm = (Fl+Fr+Q+Fb) / self.f.mass
+        Icm = np.array([1.0,1.0,1.0])
+        alfa = M / Icm
+        self.v += acm *dt
+        self.w += alfa * dt
+        self.w *= 0.8
+        self.f.position[:-1] += self.v*dt
+        self.f.rotation += self.w*dt
+        self.f.lwing.flapWingConstrained(anglesLeft)
+        self.f.rwing.flapWingConstrained(anglesRight)
+        t+=dt
 
     def calculateBodyDrag(self):
         F = -1/2 * ro * Cd * 6 * self.v * np.absolute(self.v)
