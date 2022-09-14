@@ -161,14 +161,11 @@ class PhysicsEngine:
             self.pointerRy = vp.arrow()
             self.pointerRz = vp.arrow()
 
-    def run(self):
+    def run(self,tMax,symetricWings):
         t = 0
-        tMax = 20
-
-        symetricWings = False
 
         while(t < tMax):
-            anglesLeft,anglesRight = superAwesomeMLFunkcija(self.f.position,self.f.rotation,self.v,self.w,self.f.lwing.rotation,self.f.rwing.rotation) # Nemam pojma kako bi se povezivalo ali pretpostavljam ovako nekako
+            anglesLeft,anglesRight = superAwesomeMLFunkcija(self.f.position,self.f.rotation,self.v,self.w,self.f.lwing.rotation,self.f.rwing.rotation,symetricWings) # Nemam pojma kako bi se povezivalo ali pretpostavljam ovako nekako
             
             self.step(anglesLeft,anglesRight)
 
@@ -324,4 +321,4 @@ class PhysicsEngine:
         self.bodyr = vp.quad(vs=[self.brb,self.brf,self.trf,self.trb])
 if __name__ == "__main__":
     p = PhysicsEngine()
-    p.run()
+    p.run(tMax=20,symetricWings=False)
