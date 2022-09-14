@@ -4,7 +4,7 @@ from time import sleep
 
 import vpython as vp
 
-g = np.array([0.0,0.0,-100.0])
+g = np.array([0.0,0.0,-0.0])
 dt = 0.001
 ro = 0.1225
 Cd = 1.28
@@ -118,9 +118,9 @@ class PhysicsEngine:
         self.w = np.array([0.0,0.0,0.0])
 
 
-        # self.f.rotation = np.array([0.0,0.0,pi])
-        self.f.lwing.flapWing(np.array([0.0,0.0,-0.3]))
-        self.f.rwing.flapWing(np.array([0.0,0.0,0.3]))
+        self.f.rotation = np.array([0.0,pi/2,0.0])
+        self.f.lwing.flapWing(np.array([pi/2,0.0,-0.0]))
+        self.f.rwing.flapWing(np.array([-pi/2,0.0,0.0]))
 
         
         self.midLLast = convertToGlobal(self.f.position,self.f.rotation,self.f.lwing.getMiddle())
@@ -150,10 +150,10 @@ class PhysicsEngine:
             self.update3D()
             t+= dt
             # print(self.f.position,self.v)
-            # self.f.lwing.flapWing(np.array([0.0,0.001,0.0]))
-            # self.f.rwing.flapWing(np.array([-0.0,-0.001,-0.0]))
+            self.f.lwing.flapWing(np.array([0.01,0.00,0.0]))
+            self.f.rwing.flapWing(np.array([-0.01,-0.0,-0.0]))
             t+=dt
-            sleep(0.01)
+            sleep(0.1)
 
     def calculateBodyDrag(self):
         F = -1/2 * ro * Cd * 6 * self.v * np.absolute(self.v)
