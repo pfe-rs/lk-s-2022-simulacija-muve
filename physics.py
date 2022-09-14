@@ -4,7 +4,7 @@ from time import sleep
 
 import vpython as vp
 
-g = np.array([0.0,0.0,-10.0])
+g = np.array([0.0,0.0,-100.0])
 dt = 0.001
 ro = 0.1225
 Cd = 1.28
@@ -107,8 +107,8 @@ class Fly:
         self.tlb = np.array([-1.0,-2.0,1.0,1.0])
 
 
-        self.lwing = Wing(np.array([-6.0,1.0,0.5,1.0]),np.array([-1.0,-1.0,0.5,1.0]),np.array([-1.0,1.0,0.5,1.0]))
-        self.rwing = Wing(np.array([1.0,-1.0,0.5,1.0]),np.array([6.0,1.0,0.5,1.0]),np.array([1.0,1.0,0.5,1.0]))
+        self.lwing = Wing(np.array([-4.0,1.0,0.5,1.0]),np.array([-1.0,-1.0,0.5,1.0]),np.array([-1.0,1.0,0.5,1.0]))
+        self.rwing = Wing(np.array([1.0,-1.0,0.5,1.0]),np.array([4.0,1.0,0.5,1.0]),np.array([1.0,1.0,0.5,1.0]))
 
 class PhysicsEngine:
     def __init__(self):
@@ -118,13 +118,15 @@ class PhysicsEngine:
         self.w = np.array([0.0,0.0,0.0])
 
 
-        # self.f.rotation = np.array([0.0,pi/2,0.0])
-        # self.f.lwing.flapWing(np.array([0.1,0.0,0.0]))
-        # self.f.rwing.flapWing(np.array([0.1,0.0,0.0]))
+        # self.f.rotation = np.array([0.0,0.0,pi])
+        self.f.lwing.flapWing(np.array([0.0,0.0,-0.3]))
+        self.f.rwing.flapWing(np.array([0.0,0.0,0.3]))
 
         
         self.midLLast = convertToGlobal(self.f.position,self.f.rotation,self.f.lwing.getMiddle())
         self.midRLast = convertToGlobal(self.f.position,self.f.rotation,self.f.rwing.getMiddle())
+        self.poslast = self.f.position
+        self.rotLast = self.f.rotation
         self.setup3D()
 
     def run(self):
@@ -134,8 +136,8 @@ class PhysicsEngine:
             Fl,Fr,pl,pr = self.calculateDrag()
             Q = self.f.mass * g
             pq = np.array([0.0,0.0,0.5,1.0])
-            Ml = np.cross(Fl,(pl-pq)[:-1])
-            Mr = np.cross(Fr,(pr-pq)[:-1])
+            Ml = np.cross(Fl,convertToGlobal(self.f.position,self.f.rotation,(pl-pq))[:-1])
+            Mr = np.cross(Fr,convertToGlobal(self.f.position,self.f.rotation,(pr-pq))[:-1])
             
             # print(Ml,Mr)
             M = Ml+Mr
@@ -146,14 +148,14 @@ class PhysicsEngine:
             self.w += alfa * dt
             self.f.position[:-1] += self.v*dt
             self.f.rotation += self.w*dt
-
             self.update3D()
             t+= dt
-            print(Fl,Fr,self.v,t)
-            self.f.lwing.flapWing(np.array([0.0,0.02,0.0]))
-            self.f.rwing.flapWing(np.array([-0.0,-0.02,-0.0]))
+            print(Ml,Mr)
+            # self.f.lwing.flapWing(np.array([0.0,0.001,0.0]))
+            # self.f.rwing.flapWing(np.array([-0.0,-0.001,-0.0]))
             t+=dt
-            sleep(0.01)
+            sleep(0.1)
+
 
     def calculateDrag(self):
         l = convertToGlobal(self.f.position,self.f.rotation,self.f.lwing.getMiddle())
@@ -165,11 +167,15 @@ class PhysicsEngine:
         self.midRLast = r
 
         al = convertToGlobal(np.array([0.0,0.0,0.0]),self.f.rotation,self.f.lwing.getArea())
+        al = np.absolute(al)
         ar = convertToGlobal(np.array([0.0,0.0,0.0]),self.f.rotation,self.f.rwing.getArea())
+        ar = np.absolute(ar)
         vl = dl[:-1]/dt
         vr = dr[:-1]/dt
         Fl = -1/2 * ro * Cd * al[:-1] * vl * np.absolute(vl)
         Fr = -1/2 * ro * Cd * ar[:-1] * vr * np.absolute(vr)
+        pointerL = vp.arrow(pos=vp.vector(l[0],l[2],l[1]),axis=vp.vector(Fl[0]/100,Fl[2]/100,Fl[1]/100),shaftwidth=0.5)
+        pointerR = vp.arrow(pos=vp.vector(r[0],r[2],r[1]),axis=vp.vector(Fr[0]/100,Fr[2]/100,Fr[1]/100),shaftwidth=0.5)
         return Fl,Fr,self.f.lwing.getMiddle(),self.f.rwing.getMiddle() # Sile su vektor duzine 3, l i r duzine 4 (dimenzija 4 je uvek 1 zbog homogenous transformations)
     
     def setup3D(self):
