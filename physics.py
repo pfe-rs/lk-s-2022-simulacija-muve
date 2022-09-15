@@ -138,6 +138,7 @@ class PhysicsEngine:
     def __init__(self):
 
         self.render3D = False
+        self.recordToFile = True
 
         self.f = Fly()
 
@@ -161,11 +162,19 @@ class PhysicsEngine:
             self.pointerRy = vp.arrow()
             self.pointerRz = vp.arrow()
 
-    def run(self,tMax,symetricWings):
+    def run(self,fitnessFN,superAwesomeMLFunkcija,tMax,symetricWings):
         t = 0
 
+        if self.recordToFile:
+            f = open("wingmovement.txt","w")
         while(t < tMax):
             anglesLeft,anglesRight = superAwesomeMLFunkcija(self.f.position,self.f.rotation,self.v,self.w,self.f.lwing.rotation,self.f.rwing.rotation,symetricWings) # Nemam pojma kako bi se povezivalo ali pretpostavljam ovako nekako
+
+            if self.recordToFile:
+                f.write(np.array2string(anglesLeft,formatter={'float_kind':lambda x: "%.4f" % x})[1:-1])
+                f.write("\n")
+                f.write(np.array2string(anglesRight,formatter={'float_kind':lambda x: "%.4f" % x})[1:-1])
+                f.write("\n")
             
             self.step(anglesLeft,anglesRight)
 
@@ -175,6 +184,22 @@ class PhysicsEngine:
 
             t+= dt
 
+    
+    def runFromFile(self,filename,tMax):
+        f = open(filename,'r')
+        t = 0
+
+        while(t < tMax):
+            anglesLeft = np.fromstring(f.readline(), dtype=float, sep=' ')
+            anglesRight = np.fromstring(f.readline(), dtype=float, sep=' ')
+
+            self.step(anglesLeft,anglesRight)
+
+            if self.render3D:
+                self.update3D()
+                sleep(0.1)
+
+            t+= dt
 
     def step(self,anglesLeft,anglesRight):
         Fl,Fr,pl,pr = self.calculateDrag()
@@ -221,19 +246,20 @@ class PhysicsEngine:
         vr = dr[:-1]/dt
         Fl = -1/2 * ro * Cd * al[:-1] * vl * vl * np.sign(vl)
         Fr = -1/2 * ro * Cd * ar[:-1] * vr * vr * np.sign(vr)
-        # self.pointerLx.pos = vp.vec(l[0],l[2],l[1])
-        # self.pointerLx.axis = vp.vec(vl[0],0.0,0.0)
-        # self.pointerLy.pos = vp.vec(l[0],l[2],l[1])
-        # self.pointerLy.axis = vp.vec(0.0,vl[2],0.0)
-        # self.pointerLz.pos = vp.vec(l[0],l[2],l[1])
-        # self.pointerLz.axis = vp.vec(0.0,0.0,vl[1])
+        if self.render3D:
+            self.pointerLx.pos = vp.vec(l[0],l[2],l[1])
+            self.pointerLx.axis = vp.vec(vl[0],0.0,0.0)
+            self.pointerLy.pos = vp.vec(l[0],l[2],l[1])
+            self.pointerLy.axis = vp.vec(0.0,vl[2],0.0)
+            self.pointerLz.pos = vp.vec(l[0],l[2],l[1])
+            self.pointerLz.axis = vp.vec(0.0,0.0,vl[1])
 
-        # self.pointerRx.pos = vp.vec(r[0],r[2],r[1])
-        # self.pointerRx.axis = vp.vec(vr[0],0.0,0.0)
-        # self.pointerRy.pos = vp.vec(r[0],r[2],r[1])
-        # self.pointerRy.axis = vp.vec(0.0,vr[2],0.0)
-        # self.pointerRz.pos = vp.vec(r[0],r[2],r[1])
-        # self.pointerRz.axis = vp.vec(0.0,0.0,vr[1])
+            self.pointerRx.pos = vp.vec(r[0],r[2],r[1])
+            self.pointerRx.axis = vp.vec(vr[0],0.0,0.0)
+            self.pointerRy.pos = vp.vec(r[0],r[2],r[1])
+            self.pointerRy.axis = vp.vec(0.0,vr[2],0.0)
+            self.pointerRz.pos = vp.vec(r[0],r[2],r[1])
+            self.pointerRz.axis = vp.vec(0.0,0.0,vr[1])
         return Fl,Fr,self.f.lwing.getMiddle(),self.f.rwing.getMiddle() # Sile su vektor duzine 3, l i r duzine 4 (dimenzija 4 je uvek 1 zbog homogenous transformations)
     
     def setup3D(self):
@@ -319,6 +345,7 @@ class PhysicsEngine:
 
         self.bodyl = vp.quad(vs=[self.blb,self.blf,self.tlf,self.tlb])
         self.bodyr = vp.quad(vs=[self.brb,self.brf,self.trf,self.trb])
+
 if __name__ == "__main__":
     p = PhysicsEngine()
-    p.run(tMax=20,symetricWings=False)
+    p.run(fitnessFN,superAwesomeMLFunkcija,tMax=20,symetricWings=False)
