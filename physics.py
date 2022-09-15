@@ -186,7 +186,7 @@ class PhysicsEngine:
                 mlInput = np.concatenate((self.f.position[:-1],self.f.rotation,self.v,self.w,self.f.lwing.rotation),axis=None)
                 mlOutput = superAwesomeMLNetwork.Activate(np.reshape(mlInput,(len(mlInput),1)))
                 anglesLeft = np.array([mlOutput[0][0],mlOutput[1][0],mlOutput[2][0]])
-                anglesRight = anglesLeft * [1,-1,1]
+                anglesRight = anglesLeft * [1,-1,-1]
             if self.recordToFile:
                 f.write(np.array2string(anglesLeft,formatter={'float_kind':lambda x: "%.4f" % x})[1:-1])
                 f.write("\n")
