@@ -48,6 +48,6 @@ def run():
     plt.ylable("fitness of best bug")
     plt.show()
 
-    p.run(main, 10000, crossover_chance = 4, mutation_chance = 20, score_treshold = 200, delta_score = 200, max_score_treshold = 10000, savefile_prefix = 'vector1-', save_checkpoints = True)
+    p.run(main, 5, crossover_chance = 4, mutation_chance = 20, score_treshold = 200, delta_score = 200, max_score_treshold = 10000, savefile_prefix = 'bug1-', save_checkpoints = True)
 
 run()
