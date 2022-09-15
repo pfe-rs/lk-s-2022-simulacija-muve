@@ -60,6 +60,8 @@ class Net():
             self.cache["A" + str(i)] = self.ActivationFunction(self.cache["Z" + str(i)])
 
     def Activate(self, X):
+        """ ulaz je vertikalni vektor input feature-a
+        """
         self.FeedForward(X)
         return self.cache["A" + str(self.layers_num-1)]
 
