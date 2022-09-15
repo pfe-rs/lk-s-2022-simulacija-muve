@@ -2,7 +2,10 @@ import numpy as np
 from math import sin,cos,pi,sqrt
 from time import sleep
 
-import vpython as vp
+
+render3D = True
+if render3D:
+    import vpython as vp
 
 g = np.array([0.0,0.0,-9.81])
 dt = 0.001
@@ -137,8 +140,7 @@ class Fly:
 class PhysicsEngine:
     def __init__(self):
 
-        self.render3D = False
-        self.recordToFile = True
+        self.recordToFile = False
 
         self.f = Fly()
 
@@ -153,7 +155,7 @@ class PhysicsEngine:
         self.midRLast = convertToGlobal(self.f.position,self.f.rotation,self.f.rwing.getMiddle())
 
 
-        if self.render3D:
+        if render3D:
             self.setup3D()
             self.pointerLx = vp.arrow()
             self.pointerLy = vp.arrow()
@@ -178,9 +180,9 @@ class PhysicsEngine:
             
             self.step(anglesLeft,anglesRight)
 
-            if self.render3D:
+            if render3D:
                 self.update3D()
-                sleep(0.1)
+                sleep(0.05)
 
             t+= dt
 
@@ -195,7 +197,7 @@ class PhysicsEngine:
 
             self.step(anglesLeft,anglesRight)
 
-            if self.render3D:
+            if render3D:
                 self.update3D()
                 sleep(0.1)
 
@@ -222,7 +224,6 @@ class PhysicsEngine:
         self.f.rotation += self.w*dt
         self.f.lwing.flapWingConstrained(anglesLeft)
         self.f.rwing.flapWingConstrained(anglesRight)
-        t+=dt
 
     def calculateBodyDrag(self):
         F = -1/2 * ro * Cd * 6 * self.v * np.absolute(self.v)
@@ -246,20 +247,20 @@ class PhysicsEngine:
         vr = dr[:-1]/dt
         Fl = -1/2 * ro * Cd * al[:-1] * vl * vl * np.sign(vl)
         Fr = -1/2 * ro * Cd * ar[:-1] * vr * vr * np.sign(vr)
-        if self.render3D:
+        if render3D:
             self.pointerLx.pos = vp.vec(l[0],l[2],l[1])
-            self.pointerLx.axis = vp.vec(vl[0],0.0,0.0)
+            self.pointerLx.axis = vp.vec(Fl[0]/10,0.0,0.0)
             self.pointerLy.pos = vp.vec(l[0],l[2],l[1])
-            self.pointerLy.axis = vp.vec(0.0,vl[2],0.0)
+            self.pointerLy.axis = vp.vec(0.0,Fl[2]/10,0.0)
             self.pointerLz.pos = vp.vec(l[0],l[2],l[1])
-            self.pointerLz.axis = vp.vec(0.0,0.0,vl[1])
+            self.pointerLz.axis = vp.vec(0.0,0.0,Fl[1]/10)
 
             self.pointerRx.pos = vp.vec(r[0],r[2],r[1])
-            self.pointerRx.axis = vp.vec(vr[0],0.0,0.0)
+            self.pointerRx.axis = vp.vec(Fr[0]/10,0.0,0.0)
             self.pointerRy.pos = vp.vec(r[0],r[2],r[1])
-            self.pointerRy.axis = vp.vec(0.0,vr[2],0.0)
+            self.pointerRy.axis = vp.vec(0.0,Fr[2]/10,0.0)
             self.pointerRz.pos = vp.vec(r[0],r[2],r[1])
-            self.pointerRz.axis = vp.vec(0.0,0.0,vr[1])
+            self.pointerRz.axis = vp.vec(0.0,0.0,Fr[1]/10)
         return Fl,Fr,self.f.lwing.getMiddle(),self.f.rwing.getMiddle() # Sile su vektor duzine 3, l i r duzine 4 (dimenzija 4 je uvek 1 zbog homogenous transformations)
     
     def setup3D(self):
@@ -346,6 +347,14 @@ class PhysicsEngine:
         self.bodyl = vp.quad(vs=[self.blb,self.blf,self.tlf,self.tlb])
         self.bodyr = vp.quad(vs=[self.brb,self.brf,self.trf,self.trb])
 
+def fitnessFN():
+    return
+
+def nePomerajNista(position,rotation,v,w,lwingRotation,rwingRotation,symetricWings):
+    return (np.array([0.0,0.0,0.0]), np.array([0.0,0.0,0.0]))
+
 if __name__ == "__main__":
     p = PhysicsEngine()
-    p.run(fitnessFN,superAwesomeMLFunkcija,tMax=20,symetricWings=False)
+    p.run(fitnessFN,nePomerajNista,tMax=20,symetricWings=False)
+
+
