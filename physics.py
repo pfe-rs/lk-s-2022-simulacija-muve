@@ -3,7 +3,7 @@ from math import sin,cos,pi,sqrt
 from time import sleep
 
 
-render3D = True
+render3D = False
 if render3D:
     import vpython as vp
 
@@ -154,7 +154,6 @@ class PhysicsEngine:
         self.midLLast = convertToGlobal(self.f.position,self.f.rotation,self.f.lwing.getMiddle())
         self.midRLast = convertToGlobal(self.f.position,self.f.rotation,self.f.rwing.getMiddle())
 
-
         if render3D:
             self.setup3D()
             self.pointerLx = vp.arrow()
@@ -164,13 +163,21 @@ class PhysicsEngine:
             self.pointerRy = vp.arrow()
             self.pointerRz = vp.arrow()
 
-    def run(self,fitnessFN,superAwesomeMLFunkcija,tMax,symetricWings):
+    def run(self,superAwesomeMLNetwork,tMax=3,symetricWings=False):
         t = 0
-
+        crashed = False
+        positions = np.empty((0,3),float)
+        rotations = np.empty((0,3),float)
+        velocities = np.empty((0,3),float)
+        angVelocities = np.empty((0,3),float)
+        lwingRotations = np.empty((0,3),float)
+        rwingRotations = np.empty((0,3),float)
         if self.recordToFile:
             f = open("wingmovement.txt","w")
         while(t < tMax):
-            anglesLeft,anglesRight = superAwesomeMLFunkcija(self.f.position,self.f.rotation,self.v,self.w,self.f.lwing.rotation,self.f.rwing.rotation,symetricWings) # Nemam pojma kako bi se povezivalo ali pretpostavljam ovako nekako
+            mlInput = np.concatenate((self.f.position[:-1],self.f.rotation,self.v,self.w,self.f.lwing.rotation,self.f.rwing.rotation),axis=None)
+            print(np.reshape(mlInput,(len(mlInput),1)))
+            anglesLeft,anglesRight = superAwesomeMLNetwork.Activate(np.reshape(mlInput,(len(mlInput),1)))
 
             if self.recordToFile:
                 f.write(np.array2string(anglesLeft,formatter={'float_kind':lambda x: "%.4f" % x})[1:-1])
@@ -179,13 +186,44 @@ class PhysicsEngine:
                 f.write("\n")
             
             self.step(anglesLeft,anglesRight)
-
+            positions.append(positions,np.array([self.f.position[:-1]]), axis = 0)
+            rotations.append(rotations,np.array([self.f.rotation]), axis = 0)
+            velocities.append(velocities,np.array([self.v]),axis = 0)
+            angVelocities.append(angVelocities,np.array([self.w]), axis = 0)
+            lwingRotations.append(lwingRotations,np.array([self.f.lwing.rotation]),axis = 0)
+            rwingRotations.append(rwingRotations,np.array([self.f.rwing.rotation]),axis = 0)
+            crashed = crashed or self.checkIfCrashed()
             if render3D:
                 self.update3D()
                 sleep(0.05)
 
             t+= dt
 
+        positions = np.rot90(positions)
+        rotations = np.rot90(rotations)
+        velocities = np.rot90(velocities)
+        angVelocities = np.rot90(angVelocities)
+        lwingRotations = np.rot90(lwingRotations)
+        rwingRotations = np.rot90(rwingRotations)
+
+        positions = np.flipud(positions)
+        rotations = np.flipud(rotations)
+        velocities = np.flipud(velocities)
+        angVelocities = np.flipud(angVelocities)
+        lwingRotations = np.flipud(lwingRotations)
+        rwingRotations = np.flipud(rwingRotations)
+
+        dict = {
+            "position": positions,
+            "rotation": rotations,
+            "velocity": velocities,
+            "angVelocity": angVelocities,
+            "lwingRotation": lwingRotations,
+            "rwingRotation": rwingRotations,
+            "checkIfCrashed": crashed
+        }
+
+        return dict
     
     def runFromFile(self,filename,tMax):
         f = open(filename,'r')
@@ -202,6 +240,15 @@ class PhysicsEngine:
                 sleep(0.1)
 
             t+= dt
+
+    def checkIfCrashed(self):
+        if np.linalg.norm(self.v) > 1000:
+            return True
+        if np.linalg.norm(self.w) > 1000:
+            return True
+        if np.linalg.norm(self.f.position) > 1000:
+            return True
+
 
     def step(self,anglesLeft,anglesRight):
         Fl,Fr,pl,pr = self.calculateDrag()
@@ -349,12 +396,11 @@ class PhysicsEngine:
 
 def fitnessFN():
     return
-
-def nePomerajNista(position,rotation,v,w,lwingRotation,rwingRotation,symetricWings):
-    return (np.array([0.0,0.0,0.0]), np.array([0.0,0.0,0.0]))
+class Test:
+    def Activate(params):
+        return (np.array([0.0,0.0,0.0]), np.array([0.0,0.0,0.0]))
 
 if __name__ == "__main__":
     p = PhysicsEngine()
-    p.run(fitnessFN,nePomerajNista,tMax=20,symetricWings=False)
-
-
+    thing = Test()
+    p.run(fitnessFN,thing.Activate)
