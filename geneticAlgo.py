@@ -4,7 +4,7 @@ import pickle
 import numpy as np
 
 class Population:
-    def __init__(self, population_size, architecture, scale = 1, shift = 0):
+    def __init__(self, population_size, architecture, scale = 1, shift = 0, continue_training = False, population = []):
         self.scale = scale
         self.shift = shift
         self.crossover_chance = 2
@@ -12,13 +12,16 @@ class Population:
         self.population_size = population_size
         self.architecture = architecture
         self.layer_num = len(architecture)
+        if (not continue_training):
         # Creating a population of the population_size with random genomes with fixed architecutres
-        self.population = []
-        for i in range(0, self.population_size):
-            g = network.Genome(architecture, architecture[0], 1)
-            #network.Genome.SetRandomGenomeUniform(g, scale = scale, shift = shift)
-            network.Genome.SetRandomGenomeNorm(g, scale = scale)
-            self.population.append(g)
+            self.population = []
+            for i in range(0, self.population_size):
+                g = network.Genome(architecture, architecture[0], 1)
+                #network.Genome.SetRandomGenomeUniform(g, scale = scale, shift = shift)
+                network.Genome.SetRandomGenomeNorm(g, scale = scale)
+                self.population.append(g)
+        else:
+            self.population = population
         self.generationIndex = 1
 
     # Function that returns the fitness value for the genome, used for the sort function
@@ -167,7 +170,7 @@ class Population:
     # If you set save_checkpoints to True whenever the programes saves the best genome, it will save the whole population as well, so you can continue training later from that checkpoint
     # chance of the current parameter being from the first selected parent is 1/crossover_chance
     # chance of the current parameter being set to a random value is 1/mutation_chance
-    def run(self, eval_genomes, max_generations, crossover_chance = 2, mutation_chance = 10, fitness_treshold = 1000000, score_treshold = 1000000, delta_fitness = 0, delta_score = 0, max_fitness_treshold = 2000000, max_score_treshold = 2000000, savefile_prefix = '', save_checkpoints = False):
+    def run(self, eval_genomes, max_generations, crossover_chance = 2, mutation_chance = 10, fitness_treshold = 1000000, score_treshold = 1000000, delta_fitness = 0, delta_score = 0, max_fitness_treshold = 2000000, max_score_treshold = 2000000, savefile_prefix = '', savefile_suffix = '', save_checkpoints = False):
         self.crossover_chance = crossover_chance
         self.mutation_chance = mutation_chance
         self.generationIndex = 1
@@ -229,6 +232,10 @@ class Population:
                 print(g.genome)
             print('##################################################')
             '''
+        savefile_name = savefile_prefix + 'population-' + savefile_suffix
+        with open(savefile_name, "wb") as f:
+            pickle.dump(self.population, f)
+
             
     
     # Function that returns the index of the current generation
