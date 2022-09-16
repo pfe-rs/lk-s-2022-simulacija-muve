@@ -19,18 +19,21 @@ def main(genomes):
         g.score = 0
         ge.append(g)
     
+    maxFitness = -100000
+    height = []
     for i, g in enumerate(ge):
+        #print("  " + str(i))
         gR = pe[i].run(nets[i],symetricWings = True)
-        maxFitness = 0
-        maxFitnessY = []
         if (gR["checkIfCrashed"]):
+            print("Crashed!")
             g.fitness = 0
         else:
-            g.fitness = np.sum(gR["position"], axis = 0)[2]
+            #g.fitness = np.sum(1 - np.abs(gR["position"][2]), axis = 0)
+            g.fitness = np.sum(gR["position"][2]/3000, axis = 0)
             if (g.fitness > maxFitness):
                 maxFitness = g.fitness
-                maxFitnessY = gR["position"][2]
-    plt.plot(maxFitnessY)
+                height = gR["position"][2]
+    plt.plot(height)
     plt.xlabel("time")
     plt.ylabel("best bug height")
     plt.show()
@@ -43,11 +46,10 @@ def main(genomes):
 def run():
     p = geneticAlgo.Population(50, [15, 12, 12, 3], scale=30)
 
+    p.run(main, 15, crossover_chance = 4, mutation_chance = 20, score_treshold = 200, delta_score = 200, max_score_treshold = 10000, savefile_prefix = 'bug1-', save_checkpoints = True)
+
     plt.plot(fitnessGen)
-    plt.xlabel("time")
+    plt.xlabel("generations")
     plt.ylabel("fitness of best bug")
     plt.show()
-
-    p.run(main, 5, crossover_chance = 4, mutation_chance = 20, score_treshold = 200, delta_score = 200, max_score_treshold = 10000, savefile_prefix = 'bug1-', save_checkpoints = True)
-
 run()

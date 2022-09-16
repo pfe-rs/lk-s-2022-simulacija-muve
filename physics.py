@@ -178,7 +178,7 @@ class PhysicsEngine:
             if symetricWings == False:
                 mlInput = np.concatenate((self.f.position[:-1],self.f.rotation,self.v,self.w,self.f.lwing.rotation,self.f.rwing.rotation),axis=None)
                 print(np.reshape(mlInput,(len(mlInput),1)))
-                mlOutput = superAwesomeMLNetwork.Activate(np.reshape(mlInput,(len(mlInput),1)))
+                mlOutput = superAwesomeMLNetwork.Activate(np.reshape(mlInput,(len(mlInput),1))) / 10
                 anglesLeft = np.array([mlOutput[0][0],mlOutput[1][0],mlOutput[2][0]])
                 anglesRight = np.array([mlOutput[3][0],mlOutput[4][0],mlOutput[5][0]])
             else:

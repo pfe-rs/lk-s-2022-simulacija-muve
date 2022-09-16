@@ -180,7 +180,7 @@ class Population:
             value = eval_genomes(self.population)
             # Sorting the population by fitness in decending order
             self.population.sort(key = self.compareFunction, reverse = True)
-            print(self.generationIndex, ' ', self.population[0].score)
+            print(self.generationIndex, ' ', self.population[0].fitness)
             # Checking if we should save the whole population
             if (value) or (self.population[0].fitness >= fitness_treshold) or (self.population[0].score >= score_treshold):
                 # Creating a name for the savefile containg the current generation
