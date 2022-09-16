@@ -20,7 +20,7 @@ def main(genomes):
         ge.append(g)
     
     for i, g in enumerate(ge):
-        gR = pe[i].run(nets[i])
+        gR = pe[i].run(nets[i],symetricWings = True)
         maxFitness = 0
         maxFitnessY = []
         if (gR["checkIfCrashed"]):
@@ -31,8 +31,8 @@ def main(genomes):
                 maxFitness = g.fitness
                 maxFitnessY = gR["position"][2]
     plt.plot(maxFitnessY)
-    plt.xlable("time")
-    plt.ylable("best bug height")
+    plt.xlabel("time")
+    plt.ylabel("best bug height")
     plt.show()
     fitnessGen.append(maxFitness)
     
@@ -44,8 +44,8 @@ def run():
     p = geneticAlgo.Population(50, [6, 12, 12, 6], scale=30)
 
     plt.plot(fitnessGen)
-    plt.xlable("time")
-    plt.ylable("fitness of best bug")
+    plt.xlabel("time")
+    plt.ylabel("fitness of best bug")
     plt.show()
 
     p.run(main, 5, crossover_chance = 4, mutation_chance = 20, score_treshold = 200, delta_score = 200, max_score_treshold = 10000, savefile_prefix = 'bug1-', save_checkpoints = True)

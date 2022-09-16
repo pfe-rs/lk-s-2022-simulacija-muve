@@ -1,4 +1,3 @@
-from sqlite3.dbapi2 import _AnyParamWindowAggregateClass
 import numpy as np
 from math import sin,cos,pi,sqrt
 from time import sleep
@@ -194,12 +193,12 @@ class PhysicsEngine:
                 f.write("\n")
             
             self.step(anglesLeft,anglesRight)
-            positions.append(positions,np.array([self.f.position[:-1]]), axis = 0)
-            rotations.append(rotations,np.array([self.f.rotation]), axis = 0)
-            velocities.append(velocities,np.array([self.v]),axis = 0)
-            angVelocities.append(angVelocities,np.array([self.w]), axis = 0)
-            lwingRotations.append(lwingRotations,np.array([self.f.lwing.rotation]),axis = 0)
-            rwingRotations.append(rwingRotations,np.array([self.f.rwing.rotation]),axis = 0)
+            positions = np.append(positions,np.array([self.f.position[:-1]]), axis = 0)
+            rotations = np.append(rotations,np.array([self.f.rotation]), axis = 0)
+            velocities = np.append(velocities,np.array([self.v]),axis = 0)
+            angVelocities = np.append(angVelocities,np.array([self.w]), axis = 0)
+            lwingRotations = np.append(lwingRotations,np.array([self.f.lwing.rotation]),axis = 0)
+            rwingRotations = np.append(rwingRotations,np.array([self.f.rwing.rotation]),axis = 0)
             crashed = crashed or self.checkIfCrashed()
             if render3D:
                 self.update3D()
@@ -411,4 +410,4 @@ class Test:
 if __name__ == "__main__":
     p = PhysicsEngine()
     thing = Test()
-    p.run(fitnessFN,thing.Activate)
+    p.run(thing)
