@@ -256,6 +256,7 @@ class PhysicsEngine:
         if np.linalg.norm(self.f.position) > 1000:
             return True
 
+        return False
 
     def step(self,anglesLeft,anglesRight):
         Fl,Fr,pl,pr = self.calculateDrag()

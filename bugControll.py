@@ -41,7 +41,7 @@ def main(genomes):
 
     
 def run():
-    p = geneticAlgo.Population(50, [6, 12, 12, 6], scale=30)
+    p = geneticAlgo.Population(50, [15, 12, 12, 3], scale=30)
 
     plt.plot(fitnessGen)
     plt.xlabel("time")
