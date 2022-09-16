@@ -165,6 +165,7 @@ class PhysicsEngine:
 
     def run(self,superAwesomeMLNetwork,tMax=3,symetricWings=False):
         t = 0
+        i = 0
         crashed = False
         positions = np.empty((0,3),float)
         rotations = np.empty((0,3),float)
@@ -175,23 +176,27 @@ class PhysicsEngine:
         if self.recordToFile:
             f = open("wingmovement.txt","w")
         while(t < tMax):
-            if symetricWings == False:
-                mlInput = np.concatenate((self.f.position[:-1],self.f.rotation,self.v,self.w,self.f.lwing.rotation,self.f.rwing.rotation),axis=None)
-                print(np.reshape(mlInput,(len(mlInput),1)))
-                mlOutput = superAwesomeMLNetwork.Activate(np.reshape(mlInput,(len(mlInput),1))) / 10
-                anglesLeft = np.array([mlOutput[0][0],mlOutput[1][0],mlOutput[2][0]])
-                anglesRight = np.array([mlOutput[3][0],mlOutput[4][0],mlOutput[5][0]])
-            else:
-                mlInput = np.concatenate((self.f.position[:-1],self.f.rotation,self.v,self.w,self.f.lwing.rotation),axis=None)
-                mlOutput = superAwesomeMLNetwork.Activate(np.reshape(mlInput,(len(mlInput),1)))
-                anglesLeft = np.array([mlOutput[0][0],mlOutput[1][0],mlOutput[2][0]])
-                anglesRight = anglesLeft * [1,-1,-1]
-            if self.recordToFile:
-                f.write(np.array2string(anglesLeft,formatter={'float_kind':lambda x: "%.4f" % x})[1:-1])
-                f.write("\n")
-                f.write(np.array2string(anglesRight,formatter={'float_kind':lambda x: "%.4f" % x})[1:-1])
-                f.write("\n")
-            
+            if i % 10 == 0:
+                if symetricWings == False:
+                    mlInput = np.concatenate((self.f.position[:-1],self.f.rotation,self.v,self.w,self.f.lwing.rotation,self.f.rwing.rotation),axis=None)
+                    print(np.reshape(mlInput,(len(mlInput),1)))
+                    mlOutput = superAwesomeMLNetwork.Activate(np.reshape(mlInput,(len(mlInput),1))) / 10
+                    anglesLeft = np.array([mlOutput[0][0],mlOutput[1][0],mlOutput[2][0]])
+                    anglesRight = np.array([mlOutput[3][0],mlOutput[4][0],mlOutput[5][0]])
+                else:
+                    mlInput = np.concatenate((self.f.position[:-1],self.f.rotation,self.v,self.w,self.f.lwing.rotation),axis=None)
+                    mlOutput = superAwesomeMLNetwork.Activate(np.reshape(mlInput,(len(mlInput),1))) / 10
+                    anglesLeft = np.array([mlOutput[0][0],mlOutput[1][0],mlOutput[2][0]])
+                    anglesRight = anglesLeft * [1,-1,-1]
+                if self.recordToFile:
+                    f.write(np.array2string(anglesLeft,formatter={'float_kind':lambda x: "%.4f" % x})[1:-1])
+                    f.write("\n")
+                    f.write(np.array2string(anglesRight,formatter={'float_kind':lambda x: "%.4f" % x})[1:-1])
+                    f.write("\n")
+                else:
+                    anglesLeft = np.array([0.0,0.0,0.0])
+                    anglesRight = np.array([0.0,0.0,0.0])
+            i+=1
             self.step(anglesLeft,anglesRight)
             positions = np.append(positions,np.array([self.f.position[:-1]]), axis = 0)
             rotations = np.append(rotations,np.array([self.f.rotation]), axis = 0)
