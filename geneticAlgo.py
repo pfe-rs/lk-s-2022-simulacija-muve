@@ -100,7 +100,15 @@ class Population:
                 g.params["b" + str(k)][i] = flat[idx]
                 idx += 1
 
-
+    ##################################################################################
+    ##################################################################################
+    ##################################################################################
+    ##################################################################################
+    ##################################################################################
+    ##################################################################################
+    ##################################################################################
+    ##################################################################################
+    ##################################################################################
     def MatingPool10percentRandomTwoPointCrossoverMergeSaveTop5percent(self):
         # Creating a mating pool with the best 10% of the genomes
         matingPool = []
@@ -152,6 +160,54 @@ class Population:
             self.population.append(matingPool[idx - (self.population_size-save_num)])
 
 
+    ##################################################################################
+    ##################################################################################
+    ##################################################################################
+    ##################################################################################
+    ##################################################################################
+    ##################################################################################
+    ##################################################################################
+    ##################################################################################
+    ##################################################################################
+    def MatingPool10percentArithmeticMergeSaveTop5percent(self):
+        # Creating a mating pool with the best 10% of the genomes
+        matingPool = []
+        for i in range(0, self.population_size//10):
+            matingPool.append(self.population[i])
+        self.population.clear()
+
+        # Calculating the number of genomes that will be saved from the currnet population
+        save_num = max(self.population_size//20, 1)
+
+        # Finding random genomes from the mating pool to crossover and mutate the resulting genome
+        for _ in range(0, self.population_size-save_num):
+            # Picking the random genomes
+            index1 = random.randrange(0, len(matingPool))
+            index2 = random.randrange(0, len(matingPool))
+
+            # Creating and filling the new genome
+            newGenome = network.Genome(self.architecture, self.architecture[0], self.population_size)
+            # Adding random values from one of the two selected genomes from the mating pool
+            for k in range(1, self.layer_num):
+                newGenome.params["W" + str(k)] = (matingPool[index1].params["W" + str(k)] + matingPool[index2].params["W" + str(k)]) / 2
+                newGenome.params["b" + str(k)] = (matingPool[index1].params["b" + str(k)] + matingPool[index2].params["b" + str(k)]) / 2
+            # Mutating the new genome
+            for k in range(1, self.layer_num):
+                newGenome.params["W" + str(k)] = np.where(np.random.randint(self.mutation_chance, size=(self.architecture[k], self.architecture[k-1])) == 0,
+                                                          newGenome.params["W" + str(k)],
+                                                          #np.random.rand(self.architecture[k], self.architecture[k-1]) * newGenome.scale + newGenome.shift)
+                                                          np.random.normal(0, newGenome.scale, size=(self.architecture[k], self.architecture[k-1])))
+                newGenome.params["b" + str(k)] = np.where(np.random.randint(self.mutation_chance, size=(self.architecture[k])) == 0,
+                                                          newGenome.params["b" + str(k)],
+                                                          #np.random.rand(self.architecture[k]) * newGenome.scale + newGenome.shift)
+                                                          np.random.normal(0, newGenome.scale, size=(self.architecture[k])))
+
+            # Adding the new genome to the population
+            self.population.append(newGenome)
+
+        # Adding the top 5% of the previous population
+        for idx in range(self.population_size-save_num, self.population_size):
+            self.population.append(matingPool[idx - (self.population_size-save_num)])
 
 
 
@@ -223,7 +279,7 @@ class Population:
             # Calling the merging function to get a new generation of the population
             # The new population is stored in self.population
 
-            self.MatingPool10percentRandomIndexMergeSaveTop5percent()
+            self.MatingPool10percentArithmeticMergeSaveTop5percent()
             #self.MatingPool10percentRandomTwoPointCrossoverMergeSaveTop5percent()
             
             '''

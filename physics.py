@@ -193,9 +193,9 @@ class PhysicsEngine:
                     f.write("\n")
                     f.write(np.array2string(anglesRight,formatter={'float_kind':lambda x: "%.4f" % x})[1:-1])
                     f.write("\n")
-                else:
-                    anglesLeft = np.array([0.0,0.0,0.0])
-                    anglesRight = np.array([0.0,0.0,0.0])
+            else:
+                anglesLeft = np.array([0.0,0.0,0.0])
+                anglesRight = np.array([0.0,0.0,0.0])
             i+=1
             self.step(anglesLeft,anglesRight)
             positions = np.append(positions,np.array([self.f.position[:-1]]), axis = 0)

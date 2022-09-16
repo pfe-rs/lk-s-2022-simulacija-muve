@@ -33,20 +33,18 @@ def main(genomes):
             if (g.fitness > maxFitness):
                 maxFitness = g.fitness
                 height = gR["position"][2]
+    '''
     plt.plot(height)
     plt.xlabel("time")
     plt.ylabel("best bug height")
     plt.show()
+    '''
     fitnessGen.append(maxFitness)
-    
-
-        
-
     
 def run():
     p = geneticAlgo.Population(50, [15, 12, 12, 3], scale=30)
 
-    p.run(main, 15, crossover_chance = 4, mutation_chance = 20, score_treshold = 200, delta_score = 200, max_score_treshold = 10000, savefile_prefix = 'bug1-', save_checkpoints = True)
+    p.run(main, 15, crossover_chance = 4, mutation_chance = 5, score_treshold = 200, delta_score = 200, max_score_treshold = 10000, savefile_prefix = 'bug1-', save_checkpoints = True)
 
     plt.plot(fitnessGen)
     plt.xlabel("generations")
