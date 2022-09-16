@@ -3,13 +3,25 @@ import network
 import physics as ph
 import numpy as np
 import matplotlib.pyplot as plt
+import pickle
 
 fitnessGen = []
+genNum = 0
+
+class Bug:
+    def __init__(self, gR, fitness):
+        self.bugParams = gR
+        self.fitness = fitness
+    def CompareFunction(self, b):
+        return b.fitness
 
 def main(genomes):
+    global genNum, fitnessGen
+    genNum += 1
     pe = []
     nets = []
     ge = []
+    bugs = []
     for _, g in enumerate(genomes):
         p = ph.PhysicsEngine()
         pe.append(p)
@@ -33,18 +45,24 @@ def main(genomes):
             if (g.fitness > maxFitness):
                 maxFitness = g.fitness
                 height = gR["position"][2]
+        bugs.append(Bug(gR, g.fitness))
     '''
     plt.plot(height)
     plt.xlabel("time")
     plt.ylabel("best bug height")
     plt.show()
     '''
+    bugs.sort(key = bugs[0].CompareFunction, reverse = True)
+
+    savefile_name = 'generation-' + str(genNum) + '-bestBug'
+    with open(savefile_name, "wb") as f:
+        pickle.dump(bugs, f)
     fitnessGen.append(maxFitness)
     
 def run():
     p = geneticAlgo.Population(50, [15, 12, 12, 3], scale=30)
 
-    p.run(main, 15, crossover_chance = 4, mutation_chance = 5, score_treshold = 200, delta_score = 200, max_score_treshold = 10000, savefile_prefix = 'bug1-', save_checkpoints = True)
+    p.run(main, 30, crossover_chance = 4, mutation_chance = 5, savefile_suffix='30g-1', score_treshold = 200, delta_score = 200, max_score_treshold = 10000, savefile_prefix = 'bug1-', save_checkpoints = True)
 
     plt.plot(fitnessGen)
     plt.xlabel("generations")
