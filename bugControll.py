@@ -69,4 +69,6 @@ def run():
     plt.xlabel("generations")
     plt.ylabel("fitness of best bug")
     plt.show()
-run()
+    
+if __name__ == "__main__":
+    run()

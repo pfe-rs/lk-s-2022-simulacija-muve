@@ -96,9 +96,9 @@ class Wing:
 
     def flapWingConstrained(self,angles):
 
-        maxVX = 0.06
-        maxVY = 0.01
-        maxVZ = 0.01
+        maxVX = 0.6
+        maxVY = 0.1
+        maxVZ = 0.1
         if abs(angles[0]) > maxVX:
             angles[0] = maxVX * np.sign(angles[0])
         if abs(angles[1]) > maxVX:
