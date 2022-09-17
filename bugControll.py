@@ -46,23 +46,24 @@ def main(genomes):
                 maxFitness = g.fitness
                 height = gR["position"][2]
         bugs.append(Bug(gR, g.fitness))
-    '''
-    plt.plot(height)
-    plt.xlabel("time")
-    plt.ylabel("best bug height")
-    plt.show()
-    '''
+    if(genNum % 10 == 0):
+        plt.plot(height)
+        plt.xlabel("time")
+        plt.ylabel("best bug height")
+        plt.show()
+    
     bugs.sort(key = bugs[0].CompareFunction, reverse = True)
 
-    savefile_name = 'generation-' + str(genNum) + '-bestBug'
-    with open(savefile_name, "wb") as f:
-        pickle.dump(bugs, f)
+    if(genNum % 10 == 0):
+        savefile_name = 'generation-' + str(genNum) + '-bestBug4'
+        with open(savefile_name, "wb") as f:
+            pickle.dump(bugs, f)
     fitnessGen.append(maxFitness)
     
 def run():
-    p = geneticAlgo.Population(50, [15, 12, 12, 3], scale=30)
+    p = geneticAlgo.Population(50, [15, 20, 20, 3], scale=30)
 
-    p.run(main, 30, crossover_chance = 4, mutation_chance = 5, savefile_suffix='30g-1', score_treshold = 200, delta_score = 200, max_score_treshold = 10000, savefile_prefix = 'bug1-', save_checkpoints = True)
+    p.run(main, 100, crossover_chance = 4, mutation_chance = 5, savefile_suffix='30g-3', score_treshold = 200, delta_score = 200, max_score_treshold = 10000, savefile_prefix = 'bug1-', save_checkpoints = True)
 
     plt.plot(fitnessGen)
     plt.xlabel("generations")

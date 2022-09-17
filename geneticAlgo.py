@@ -281,7 +281,8 @@ class Population:
 
             self.MatingPool10percentArithmeticMergeSaveTop5percent()
             #self.MatingPool10percentRandomTwoPointCrossoverMergeSaveTop5percent()
-            
+            #self.MatingPool10percentRandomIndexMergeSaveTop5percent()
+
             '''
             # Printing the population genomes
             for g in self.population:
