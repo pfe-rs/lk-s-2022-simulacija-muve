@@ -9,7 +9,7 @@ import pickle
 
 class renderer3D:
     def __init__(self):
-        self.savefile_name = "generation-10-bestBug4"
+        self.savefile_name = "generation-20-bestBug4"
 
     def setup3DBest(self):
         self.bugs = []
