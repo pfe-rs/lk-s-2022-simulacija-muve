@@ -9,7 +9,7 @@ import pickle
 
 class renderer3D:
     def __init__(self):
-        self.savefile_name = "generation-5-bestBug"
+        self.savefile_name = "generation-10-bestBug4"
 
     def setup3DBest(self):
         self.bugs = []
@@ -61,6 +61,11 @@ class renderer3D:
         self.bodyr = vp.quad(vs=[self.brb,self.brf,self.trf,self.trb])
         self.bodyf = vp.quad(vs=[self.blf,self.brf,self.trf,self.tlf])
         self.bodyf = vp.quad(vs=[self.blb,self.brb,self.trb,self.tlb])
+
+
+        xAxis = vp.curve(vp.vector(0,0,0), vp.vector(20,0,0))
+        yAxis = vp.curve(vp.vector(0,0,0), vp.vector(0,0,20))
+        zAxis = vp.curve(vp.vector(0,0,0), vp.vector(0,20,0))
 
         for i in range(framenum-1):
             self.update3DBest(i+1)
@@ -129,7 +134,7 @@ class renderer3D:
         self.bodyl = vp.quad(vs=[self.blb,self.blf,self.tlf,self.tlb])
         self.bodyr = vp.quad(vs=[self.brb,self.brf,self.trf,self.trb])
 
-        sleep(0.02)
+        sleep(0.01)
 
     def setup3DAll(self):
         return
