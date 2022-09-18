@@ -208,6 +208,10 @@ class Population:
         # Adding the top 5% of the previous population
         for idx in range(self.population_size-save_num, self.population_size):
             self.population.append(matingPool[idx - (self.population_size-save_num)])
+        for i in range(save_num):
+            g = network.Genome(self.architecture, self.architecture[0], 1)
+            g.SetRandomGenomeNorm(self.scale)
+            self.population[i] = g
 
 
 
