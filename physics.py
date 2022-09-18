@@ -5,7 +5,7 @@ from time import sleep
 
 render3D = False
 if render3D:
-    import vpython as vp
+    import vpython as vp # Includeovanje dadoteke automatski pali virtual screen u browseru
 
 g = np.array([0.0,0.0,-9.81])
 dt = 0.001
@@ -147,6 +147,7 @@ class PhysicsEngine:
         self.v = np.array([0.0,0.0,0.0])
         self.w = np.array([0.0,0.0,0.0])
 
+        # self.f.position = np.array([0.0,0.0,0.0,1.0]) # Postavljanje pocetnih vrednosi pozicije, rotacije i krila
         # self.f.rotation = np.array([0.0,pi/4,0.0])
         # self.f.lwing.flapWing(np.array([pi/2,0.0,-0.0]))
         # self.f.rwing.flapWing(np.array([-pi/2,0.0,0.0]))
@@ -177,7 +178,7 @@ class PhysicsEngine:
             f = open("wingmovement.txt","w")
         while(t < tMax):
             if i % 10 == 0:
-                if symetricWings == False:
+                if symetricWings == False: # Interact sa mrezom ako su krila odvojena - 15 inputa u ML, 3 outputa
                     mlInput = np.concatenate((self.f.position[:-1],self.f.rotation,self.v,self.w,self.f.lwing.rotation,self.f.rwing.rotation),axis=None)
                     print(np.reshape(mlInput,(len(mlInput),1)))
                     mlOutput = superAwesomeMLNetwork.Activate(np.reshape(mlInput,(len(mlInput),1))) / 10
@@ -198,7 +199,7 @@ class PhysicsEngine:
                 anglesRight = np.array([0.0,0.0,0.0])
             i+=1
             self.step(anglesLeft,anglesRight)
-            positions = np.append(positions,np.array([self.f.position[:-1]]), axis = 0)
+            positions = np.append(positions,np.array([self.f.position[:-1]]), axis = 0) # Cuvanje svih bitnih informacija bube za kasnije racunanje fitnesa / prikazivanje simulacije
             rotations = np.append(rotations,np.array([self.f.rotation]), axis = 0)
             velocities = np.append(velocities,np.array([self.v]),axis = 0)
             angVelocities = np.append(angVelocities,np.array([self.w]), axis = 0)
@@ -253,7 +254,7 @@ class PhysicsEngine:
 
             t+= dt
 
-    def checkIfCrashed(self):
+    def checkIfCrashed(self): # Ako buba dostigne nemoguce vrednosti, obelezimo je kao crashovanu kako je ne bi racunali u sledecim generacijama
         if np.linalg.norm(self.v) > 1000:
             return True
         if np.linalg.norm(self.w) > 1000:
@@ -263,7 +264,7 @@ class PhysicsEngine:
 
         return False
 
-    def step(self,anglesLeft,anglesRight):
+    def step(self,anglesLeft,anglesRight): # Jedan frame (duzine dt) iz fizike, racunanje dinamike i kinematike i pomeranje krila i bube
         Fl,Fr,pl,pr = self.calculateDrag()
         Fb = self.calculateBodyDrag()
         Q = self.f.mass * g
@@ -407,11 +408,11 @@ class PhysicsEngine:
         self.bodyl = vp.quad(vs=[self.blb,self.blf,self.tlf,self.tlb])
         self.bodyr = vp.quad(vs=[self.brb,self.brf,self.trf,self.trb])
 
-def fitnessFN():
+def fitnessFN(): # Korisceno za testiranje simulacije umesto ML
     return
 class Test:
     def Activate(params):
-        return (np.array([0.0,0.0,0.0]), np.array([0.0,0.0,0.0]))
+        return np.array([[0.0],[0.0],[0.0]])
 
 if __name__ == "__main__":
     p = PhysicsEngine()
