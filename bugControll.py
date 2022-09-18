@@ -28,7 +28,7 @@ def main(genomes):
     for _, g in enumerate(genomes):
         p = ph.PhysicsEngine()
         pe.append(p)
-        net = network.Net(g)
+        net = network.Net(g.genome)
         nets.append(net)
         g.fitness = 0
         g.score = 0
@@ -45,10 +45,10 @@ def main(genomes):
         else:
             #g.fitness = np.sum(1 - np.abs(gR["position"][2]), axis = 0)
             timePoints = 3000
-            g.fitness = np.sum(gR["position"][2]/timePoints, axis = 0)
-            g.fitness -= np.sum(gR["position"][0]/timePoints, axis = 0)/5
-            g.fitness -= np.sum(gR["position"][1]/timePoints, axis = 0)/5
-
+            #g.fitness = np.sum(gR["position"][2]/timePoints, axis = 0)
+            #g.fitness -= np.sum(gR["position"][0]/timePoints, axis = 0)/5
+            #g.fitness -= np.sum(gR["position"][1]/timePoints, axis = 0)/5
+            g.fitness  = gR["position"][2][2999]
             if (g.fitness > maxFitness):
                 maxFitness = g.fitness
                 height = gR["position"][2]
@@ -78,23 +78,23 @@ def main(genomes):
     fitnessGen.append(maxFitness)
 
     # printing average time per generation over last x generations and managing time
-    '''
+    
     currTime = time.time()
-    x = 10
-    print("Gen " + str(genNum) + " avg. time: " + str((currTime - prevTime)/10))
+    x = 1
+    print("Gen " + str(genNum) + " avg. time: " + str((currTime - prevTime)/x))
     prevTime = currTime
-    '''
+    
     
 
 def run():
     global startTime, prevTime
-    p = geneticAlgo.Population(100, [15, 20, 20, 3], scale=30)
+    p = geneticAlgo.Population(100, 4, [15, 20, 20, 3])
 
     startTime = time.time()
     prevTime = startTime
 
     totalGenerations = 50
-    p.run(main, totalGenerations, crossover_chance = 4, mutation_chance = 5, savefile_suffix='50g-5', score_treshold = 200, delta_score = 200, max_score_treshold = 10000, savefile_prefix = 'bug1-', save_checkpoints = True)
+    p.run(main, totalGenerations, score_treshold = 200, delta_score = 200, max_score_treshold = 10000, savefile_prefix = 'bug1-', save_checkpoints = True)
     currTime = time.time()
     print("TOTAL TIME: " + str(currTime - startTime))
     print("AVERAGE TIME PER GENERATION: " + str((currTime - startTime)/totalGenerations))

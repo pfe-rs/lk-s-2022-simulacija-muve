@@ -1,75 +1,91 @@
-from platform import architecture
-import numpy as np
+import math
+from platform import java_ver
+import random
 
-# architecture is an array, the first element is the number of layers in the network (including input and output layer)
-# after that there are the number of neruons in each layer in order from input to output layer
-
-class Genome():
-    # When constructing genome it will generate parametars, weights and biases, for each layer that are set to be empty
-    def __init__(self, architecture, numInputFeatures, batchSize):
-        self.architecture = architecture
-        self.layers_num = len(architecture)
-        self.numInputFeatures = numInputFeatures
-        self.batchSize = batchSize
-        self.fitness = 0
-        self.score = 0
-        self.scale = 1
-        self.shift = 0
-        self.params = {}
-        for i in range(1, self.layers_num):
-            self.params["W" + str(i)] = np.empty((architecture[i], architecture[i-1])) # mozda je bolje np.zeros
-            self.params["b" + str(i)] = np.empty((architecture[i], 1))
-
-    # This function sets the parametars to a random value between 0 and 1 multiplied by "scale". It will also add "shift" to each value
-    def SetRandomGenomeUniform(self, scale = 1, shift = 0):
-        for i in range(1, self.layers_num):
-            self.params["W" + str(i)] = np.random.rand(self.architecture[i], self.architecture[i-1]) * scale + shift
-            self.params["b" + str(i)] = np.random.rand(self.architecture[i], 1) * scale + shift
-            self.scale = scale
-            self.shift = shift
-
-    def SetRandomGenomeNorm(self, scale = 1):
-        for i in range(1, self.layers_num):
-            self.params["W" + str(i)] = np.random.normal(0, scale, size=(self.architecture[i], self.architecture[i-1]))
-            self.params["b" + str(i)] = np.random.normal(0, scale, size=(self.architecture[i], 1))
-            self.scale = scale
-        
-
-class Net():
+# klasa mreza
+class Net:
     def __init__(self, genome):
+        # A unique network can be reconstructed from every genome
+        # genome holds this genome in our network
         self.genome = genome
-        self.architecture = genome.architecture
-        self.numInputFeatures = genome.numInputFeatures
-        self.batchSize = genome.batchSize
-        self.params = genome.params
-        self.layers_num = genome.layers_num
-        self.cache = {}
+        # layer_num holds the number of layers in our network
+        self.layer_num = genome[0]
+        # architecture holds an array representing the number of nodes in each layer (input, hidden layers, output)
+        self.architecture = []
 
-    def Sigmoid(self, Z):
-        return np.where(Z > 0, 1/(1 + np.exp(-Z)), np.exp(Z) / (1 + np.exp(Z))) # ovo mi daje overflow u exp????
+        self.nodes = []
 
-    def ActivationFunction(self, Z):
-        return np.tanh(Z)
-        #return self.Sigmoid(Z)
+        # Making the nodes of the network and assining 0 to the value in each node
+        for i in range(1, self.layer_num+1):
+            self.architecture.append(genome[i])
+            self.nodes.append([])
 
-    def FeedForward(self, X):
-        self.cache["Z1"] = np.dot(self.params["W1"], X)
-        self.cache["A1"] = self.ActivationFunction(self.cache["Z1"])
-        for i in range(2, self.layers_num):
-            self.cache["Z" + str(i)] = np.dot(self.params["W" + str(i)], self.cache["A" + str(i-1)])
-            self.cache["A" + str(i)] = self.ActivationFunction(self.cache["Z" + str(i)])
+            for j in range(0, self.architecture[i-1]+1):
+                self.nodes[i-1].append(0)
+ 
+        self.weights = []
+        self.weights.append([])
+        idx = self.layer_num+1
+        for k in range(1, self.layer_num):
+            self.weights.append([])
+ 
+            for i in range(0, self.architecture[k]):
+                self.weights[k].append([])
+ 
+                for j in range(0, self.architecture[k-1]+1):
+                    self.weights[k][i].append(genome[idx])
+                    idx += 1
+                    if j == self.architecture[k-1]:
+                        self.nodes[k-1][j] = 1
 
-    def Activate(self, X):
-        """ ulaz je vertikalni vektor input feature-a
-        """
-        self.FeedForward(X)
-        return self.cache["A" + str(self.layers_num-1)]
+    def Sigmoid(self, value):
+        if value > 0:
+            return (1 / (1 + math.exp(-value)))
+        else:
+            return (math.exp(value) / (1 + math.exp(value)))
+ 
+# funkcija koja ce da od vrednosti vrati vrednost izmedju 0 i 1
+    def Squish(self, value):
+        return self.Sigmoid(value)
 
-    
-    
-#g = Genome([2, 3, 2], 3, 2)
-#g.SetRandomGenomeUniform()
-#net = Net(g)
-#X = [[4, 3], [1, 2], [5, 3]]
-#print(net.Activate(X))
+# funckija koja unosi prosledjeni niz u prvi sloj neuronske mreze
+    def FillInput(self, input):
+        for i, x in enumerate(input):
+            self.nodes[0][i] = x
+
+# funkcija koja prolazi kroz celu mrezu propagirajuce vrednosti iz prethodnog sloja u trenutni, ostavlja popunjen poslednji sloj na kraju
+    def FeedForward(self):
+        for k in range(1, self.layer_num):
+            for i in range(0, self.architecture[k]):
+                self.nodes[k][i] = 0
+ 
+                for j in range(0, self.architecture[k-1]+1):
+                    self.nodes[k][i] += self.nodes[k-1][j] * self.weights[k][i][j]
+ 
+                self.nodes[k][i] = self.Squish(self.nodes[k][i])
+
+# funkcija koja vraca vrednosti iz poslednjeg sloja neuronske mreze
+    def ReturnOutput(self):
+        output = [val for val in self.nodes[self.layer_num-1]]
+        output.pop(len(output)-1)
+        return output
+
+# funkcija koja uzima niz ulaznih vrednosti za mrezu i vraca niz vrednosti koje mreza da
+    def Activate(self, input):
+        self.FillInput(input)
+        self.FeedForward()
+        return self.ReturnOutput()
+
+# funkcija koja generise genom sa nasumicnim tezinama izmedju -30 i 30, kojem se prethodno zada fiksna arhitektura
+def GetRandomGenomeFixedArchitecture(layer_num, architecture):
+    genome = []
+    genome.append(layer_num)
+    for arch in architecture:
+        genome.append(arch)
+    for k in range(1, layer_num):
+        for i in range(0, architecture[k]):
+            for j in range(0, architecture[k-1]+1):
+                genome.append(random.uniform(-30, 30))
+    return genome
+
 
