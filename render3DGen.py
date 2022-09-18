@@ -9,7 +9,7 @@ import pickle
 
 class renderer3D:
     def __init__(self):
-        self.savefile_name = "generation-20-bestBug4"
+        self.savefile_name = "generation-6-bestBug"
 
     def setup3DBest(self):
         self.bugs = []
@@ -20,7 +20,7 @@ class renderer3D:
 
         framenum = len(self.bestbug["position"][0])
         print(framenum)
-
+        scene = vp.canvas(width = 1500, height=900)
         pomGlobal = convertToGlobal(self.f.position,self.f.rotation,self.f.lwing.pivot)
         self.lp = vp.vertex(pos=vp.vec(pomGlobal[0],pomGlobal[2],pomGlobal[1]))
         pomGlobal = convertToGlobal(self.f.position,self.f.rotation,self.f.lwing.point1)
@@ -38,23 +38,23 @@ class renderer3D:
         self.rw = vp.triangle(vs=[self.rp,self.rp1,self.rp2])
 
         pomGlobal = convertToGlobal(self.f.position,self.f.rotation,self.f.blb)
-        self.blb = vp.vertex(pos=vp.vec(pomGlobal[0],pomGlobal[2],pomGlobal[1]))
+        self.blb = vp.vertex(pos=vp.vec(pomGlobal[0],pomGlobal[2],pomGlobal[1]),color=vp.color.yellow)
         pomGlobal = convertToGlobal(self.f.position,self.f.rotation,self.f.blf)
-        self.blf = vp.vertex(pos=vp.vec(pomGlobal[0],pomGlobal[2],pomGlobal[1]))
+        self.blf = vp.vertex(pos=vp.vec(pomGlobal[0],pomGlobal[2],pomGlobal[1]),color=vp.color.yellow)
         pomGlobal = convertToGlobal(self.f.position,self.f.rotation,self.f.brb)
-        self.brb = vp.vertex(pos=vp.vec(pomGlobal[0],pomGlobal[2],pomGlobal[1]))
+        self.brb = vp.vertex(pos=vp.vec(pomGlobal[0],pomGlobal[2],pomGlobal[1]),color=vp.color.yellow)
         pomGlobal = convertToGlobal(self.f.position,self.f.rotation,self.f.brf)
-        self.brf = vp.vertex(pos=vp.vec(pomGlobal[0],pomGlobal[2],pomGlobal[1]))
+        self.brf = vp.vertex(pos=vp.vec(pomGlobal[0],pomGlobal[2],pomGlobal[1]),color=vp.color.yellow)
         self.bodyb = vp.quad(vs=[self.blb,self.blf,self.brf,self.brb])
 
         pomGlobal = convertToGlobal(self.f.position,self.f.rotation,self.f.tlb)
-        self.tlb = vp.vertex(pos=vp.vec(pomGlobal[0],pomGlobal[2],pomGlobal[1]))
+        self.tlb = vp.vertex(pos=vp.vec(pomGlobal[0],pomGlobal[2],pomGlobal[1]),color=vp.color.yellow)
         pomGlobal = convertToGlobal(self.f.position,self.f.rotation,self.f.tlf)
-        self.tlf = vp.vertex(pos=vp.vec(pomGlobal[0],pomGlobal[2],pomGlobal[1]))
+        self.tlf = vp.vertex(pos=vp.vec(pomGlobal[0],pomGlobal[2],pomGlobal[1]),color=vp.color.yellow)
         pomGlobal = convertToGlobal(self.f.position,self.f.rotation,self.f.trb)
-        self.trb = vp.vertex(pos=vp.vec(pomGlobal[0],pomGlobal[2],pomGlobal[1]))
+        self.trb = vp.vertex(pos=vp.vec(pomGlobal[0],pomGlobal[2],pomGlobal[1]),color=vp.color.yellow)
         pomGlobal = convertToGlobal(self.f.position,self.f.rotation,self.f.trf)
-        self.trf = vp.vertex(pos=vp.vec(pomGlobal[0],pomGlobal[2],pomGlobal[1]))
+        self.trf = vp.vertex(pos=vp.vec(pomGlobal[0],pomGlobal[2],pomGlobal[1]),color=vp.color.yellow)
         self.bodyt = vp.quad(vs=[self.tlb,self.tlf,self.trf,self.trb])
 
         self.bodyl = vp.quad(vs=[self.blb,self.blf,self.tlf,self.tlb])
